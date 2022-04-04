@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Problem with centering after change of viewport</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #container {
+           width: 100vw;
+           height: 100vh;
+           margin: 0;
+           position: relative;
+        }
+
+        #changeViewport {
+            position: absolute;
+            bottom: 10vh;
+            right: 10vw;
+            border-radius: 5px;
+            background: tomato;
+            color: whitesmoke;
+            z-index: 1;
+            border: none;
+            padding: 30px;
+            font-size: 30px;
+            font-family: sans-serif;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://threejs.org/build/three.js"></script>
+    
+    <div id="container">
+        <button id="changeViewport">Change viewport</button>
+    </div>
+
+    <script>
+        setTimeout(() => {
+            const scene = new THREE.Scene();
+            // const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1000);
+            // camera.position.z = 100;
+            camera.position.z = 5;
+            // camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            const container = document.getElementById('container');
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            // renderer.setClearColor(userSettings.canvasColor);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(container.clientWidth, container.clientHeight, false);
+            renderer.autoClear = false;
+            renderer.autoClearColor = false;
+            renderer.autoClearDepth = false;
+            renderer.autoClearStencil = false;
+            // renderer.outputEncoding = THREE.LogLuvEncoding;
+            
+            const canvas = renderer.domElement;
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            canvas.style.position = 'absolute';
+            canvas.style.left = '0';
+            canvas.style.top = '0';
+            // canvas.style.flex = 'auto';
+            container.appendChild(canvas);
+
+            const geometry = new THREE.BoxGeometry();
+            // const material = new THREE.MeshPhongMaterial({ color: 0xffbbaa });
+            const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+            const box = new THREE.Mesh(geometry, material);
+            scene.add(box);
+
+            function renderLoop() {
+                renderer.render(scene, camera);
+
+                requestAnimationFrame(renderLoop);
+            }
+
+            renderLoop();
+
+            document.addEventListener('resize', () => {
+                updateCanvasSize();
+            });
+
+            function updateCanvasSize() {
+                const container = document.getElementById('container');
+                renderer.setSize(container.clientWidth, container.clientHeight, false);
+            }
+
+            let isNormalViewport = true;
+            function changeViewport() {
+                const viewPort = document.getElementById('viewport');
+                
+                if (isNormalViewport) {
+                    viewPort.setAttribute(
+                        'content',
+                        'width=1300, initial-scale=0, maximum-scale=1.0, minimum-scale=0.25, user-scalable=yes'
+                    );
+                } else {
+                    viewPort.setAttribute(
+                        'content',
+                        'width=device-width, initial-scale=1, shrink-to-fit=no'
+                    );
+                }
+                isNormalViewport = !isNormalViewport;
+                updateCanvasSize();
+            };
+
+            document.getElementById('changeViewport').addEventListener('click', changeViewport);
+        });
+    </script>
+</body>
+</html>
